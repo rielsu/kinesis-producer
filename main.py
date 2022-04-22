@@ -1,6 +1,6 @@
 import boto3
 import uuid
-import datetime
+from datetime import datetime
 import time
 import random
 import json
@@ -32,3 +32,5 @@ while True:
                 Data=message,
                 PartitionKey=partition_key)
         time.sleep(random.uniform(0, 1))
+
+
