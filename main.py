@@ -4,33 +4,50 @@ from datetime import datetime
 import time
 import random
 import json
-client = boto3.client('kinesis', region_name='us-east-1')
+import random
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+PROFILE_NAME = os.getenv('PROFILE_NAME')
+REGION_NAME = os.getenv('REGION_NAME')
+STREAM_NAME = os.getenv('STREAM_NAME')
+
+
+session = boto3.Session(profile_name=PROFILE_NAME)
+client = session.client('kinesis',region_name=REGION_NAME)
 partition_key = str(uuid.uuid4())
 number_of_results = 500
 
+
+# Streaming Data Configurations
+frequency = int(input('Frequency of message generation in seconds: '))
+
 def data_builder():
-    return {
-            "eventId": str(uuid.uuid4()),
-            "eventDate": str(datetime.now()),
-                "businessProcess": "PolicyEnrollment",
-                "eventClass": "CaseEvent",
-                "eventType": "CaseChange",
-                "eventStatus": "Success",
-                "market": "Broad",
-                "sourceSystem": "Intake",
-                "sourceState": {
-                "3rdParty": "LexisNexis",
-                "3rdPartyService": "Risk Classifier"
-                }
-    }
+        dateToday = datetime.now()
+        currTimeSuffix = dateToday.strftime("%Y-%m-%d %H:%M:%S")
+        CurrencyList = ['INR', 'USD', 'GBP', 'CAD', 'AED', 'JPY']
+        return {
+                "SaleID":'GKS' + str("%03d" % random.randrange(2, 200)),
+                "Product_ID" : 'P' + str("%03d" % random.randrange(1, 30)),
+                "QuantitySold" : random.randrange(1, 10),
+                "Vendor_ID" : 'GV' + str("%03d" % random.randrange(1, 20)),
+                "SaleDate" : currTimeSuffix,
+                "Sale_Amount" : '',
+                "Currency" : random.choice(CurrencyList)
+        }
+
 
 while True:
 
         message = json.dumps(data_builder())
+        print(message)
         client.put_record(
-                StreamName='dream',
+                StreamName=STREAM_NAME ,
                 Data=message,
                 PartitionKey=partition_key)
-        time.sleep(random.uniform(0, 1))
+        
+        time.sleep(frequency)
 
 
